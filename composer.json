@@ -1,0 +1,25 @@
+{
+  "name": "danrodri/rtc",
+  "type": "library",
+  "description": "RTC REST API Wrapper",
+  "keywords": ["rtc", "rational", "rest", "ibm"],
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Daniel Rodriguez",
+      "email": "danrodri@mx1.ibm.com"
+    }
+  ],
+  "require": {
+    "php": ">=5.5.9"
+  },
+  "autoload": {
+    "classmap": [
+      "src/"
+    ],
+    "psr-0": {
+      "IBM\\Rtc\\": "src/"
+    }
+  }
+
+}
