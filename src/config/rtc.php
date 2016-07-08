@@ -7,6 +7,7 @@
  */
 return [
     'host' => 'https://swgjazz.ibm.com:8017/jazz',
+    'namespace' => 'https://swgjazz.ibm.com:8017/jts/users/',
     'user' => env('RTC_USERNAME', ''),
     'pass' => env('RTC_PASSWORD', ''),
 ];
