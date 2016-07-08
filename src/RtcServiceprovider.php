@@ -2,7 +2,7 @@
 /**
  * @category   IBM Confidential
  * @copyright  Copyright (C) 2016 International Business Machines Corp. - All Rights Reserved
- * @license    Unauthorized copying of this file, via any medium is strictly prohibited
+ * @license    MIT
  * @author     Written by Daniel Rodriguez <danrodri@mx1.ibm.com>, 01 2016
  */
 

@@ -2,7 +2,7 @@
 /**
  * @category   IBM Confidential
  * @copyright  Copyright (C) 2015 International Business Machines Corp. - All Rights Reserved
- * @license    Unauthorized copying of this file, via any medium is strictly prohibited
+ * @license    MIT
  * @author     Written by Daniel Rodriguez <danrodri@mx1.ibm.com>, November 2015
  */
 
@@ -247,15 +247,15 @@ class Rtc
             exit("\nEmpty response on $host$url\n");
         }
 
-        if(!\File::exists(storage_path('counter/'.date('Y-m-d').'.txt'))){
-            File::put(storage_path('counter/'.date('Y-m-d').'.txt'),0);
+        if(!\File::exists(storage_path('app/'.date('Y-m-d').'.txt'))){
+            File::put(storage_path('app/'.date('Y-m-d').'.txt'),0);
         }
 
-        $counter = (int) File::get(storage_path('counter/'.date('Y-m-d').'.txt'));
+        $counter = (int) File::get(storage_path('app/'.date('Y-m-d').'.txt'));
 
         $counter++;
 
-        File::put(storage_path('counter/'.date('Y-m-d').'.txt'),$counter);
+        File::put(storage_path('app/'.date('Y-m-d').'.txt'),$counter);
 
         return $result;
     }
