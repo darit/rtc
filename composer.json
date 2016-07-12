@@ -1,5 +1,5 @@
 {
-  "name": "danrodri/rtc",
+  "name": "darit/rtc",
   "type": "library",
   "description": "RTC REST API Wrapper",
   "keywords": ["rtc", "rational", "rest", "ibm"],
