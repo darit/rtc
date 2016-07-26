@@ -384,4 +384,18 @@ class Rtc
 
         return $this->workitem;
     }
+
+    public function updateWorkitem($id, array $changes)
+    {
+        $rtc = $this;
+        Cache::forget('workitem-' . $id);
+        $this->workitem = Cache::rememberForever(
+            'workitem-' . $id, function () use ($id, $rtc, $changes) {
+            $result = $rtc->executeCurl('/oslc/workitems/' . $id, true, $changes);
+            return new Workitem(json_decode($result), $rtc);
+        }
+        );
+
+        return $this->workitem;
+    }
 }

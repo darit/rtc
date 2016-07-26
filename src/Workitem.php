@@ -327,4 +327,11 @@ class Workitem
     {
         return $this->data;
     }
+
+    public function update(array $changes)
+    {
+        $result = $this->rtc->executeCurl('/oslc/workitems/' . $this->id, true, $changes);
+
+        return $this;
+    }
 }
