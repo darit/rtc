@@ -186,6 +186,11 @@ class Rtc
                 ]
             );
         } else {
+            foreach($changeRequest as $field => $value){
+                $newField = str_replace('rtc_cm','rtc_ext', $field);
+                unset($changeRequest[$field]);
+                $changeRequest[$newField] = $value;
+            }
             $properties = implode(',', array_keys($changeRequest));
             $etag = $this->getEtag($url, $useHost, $changeRequest);
             //$payload = $this->generateChangeRequest($host . $url, $changeRequest);

@@ -332,6 +332,6 @@ class Workitem
     {
         $result = $this->rtc->executeCurl('/oslc/workitems/' . $this->id, true, $changes);
 
-        return $this;
+        return $result;
     }
 }
