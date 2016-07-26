@@ -1,6 +1,6 @@
 <?php
 /**
- * 
+ *
  * @copyright  Copyright (C) 2015 International Business Machines Corp. - All Rights Reserved
  * @license    MIT
  * @author     Written by Daniel Rodriguez <danrodri@mx1.ibm.com>, November 2015
@@ -62,11 +62,11 @@ class Rtc
         $curl = curl_init();
         curl_setopt_array(
             $curl, [
-            CURLOPT_URL            => $this->host . '/authenticated/identity',
-            CURLOPT_COOKIEJAR      => storage_path('app/' . self::$cookie),
-            CURLOPT_SSL_VERIFYPEER => false,
-            CURLOPT_RETURNTRANSFER => true
-        ]
+                CURLOPT_URL => $this->host . '/authenticated/identity',
+                CURLOPT_COOKIEJAR => storage_path('app/' . self::$cookie),
+                CURLOPT_SSL_VERIFYPEER => false,
+                CURLOPT_RETURNTRANSFER => true
+            ]
         );
 
         curl_exec($curl);
@@ -87,20 +87,20 @@ class Rtc
                 'j_password' => $this->pass,
             ]
         );
-        
+
         $curl = curl_init();
         curl_setopt_array(
             $curl, [
-            CURLOPT_URL            => $this->host
-                . '/authenticated/j_security_check?',
-            CURLOPT_COOKIEFILE     => storage_path('app/' . self::$cookie),
-            CURLOPT_COOKIEJAR      => storage_path('app/' . self::$cookie),
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_POST           => 1,
-            CURLOPT_POSTFIELDS     => $query,
-            CURLOPT_SSL_VERIFYPEER => false,
-            CURLOPT_RETURNTRANSFER => true
-        ]
+                CURLOPT_URL => $this->host
+                    . '/authenticated/j_security_check?',
+                CURLOPT_COOKIEFILE => storage_path('app/' . self::$cookie),
+                CURLOPT_COOKIEJAR => storage_path('app/' . self::$cookie),
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_POST => 1,
+                CURLOPT_POSTFIELDS => $query,
+                CURLOPT_SSL_VERIFYPEER => false,
+                CURLOPT_RETURNTRANSFER => true
+            ]
         );
 
         curl_exec($curl);
@@ -166,66 +166,155 @@ class Rtc
         if ($changeRequest === false) {
             curl_setopt_array(
                 $curl, [
-                CURLOPT_URL              => $host . $url,
-                CURLOPT_COOKIEFILE       => storage_path('app/' . self::$cookie),
-                CURLOPT_COOKIEJAR        => storage_path('app/' . self::$cookie),
-                CURLOPT_SSL_VERIFYPEER   => false,
-                CURLOPT_RETURNTRANSFER   => true,
-                CURLOPT_NOPROGRESS       => true,
-                CURLOPT_PROGRESSFUNCTION => function ($clientp, $dltotal, $dlnow, $ultotal, $ulnow) {
-                    if (!$this->created) {
-                        $progress = new ProgressBar(new ConsoleOutput(1, true), $dltotal);
-                        $progress->setFormat('verbose');
-                        $progress->start();
+                    CURLOPT_URL => $host . $url,
+                    CURLOPT_COOKIEFILE => storage_path('app/' . self::$cookie),
+                    CURLOPT_COOKIEJAR => storage_path('app/' . self::$cookie),
+                    CURLOPT_SSL_VERIFYPEER => false,
+                    CURLOPT_RETURNTRANSFER => true,
+                    CURLOPT_NOPROGRESS => true,
+                    CURLOPT_PROGRESSFUNCTION => function ($clientp, $dltotal, $dlnow, $ultotal, $ulnow) {
+                        if (!$this->created) {
+                            $progress = new ProgressBar(new ConsoleOutput(1, true), $dltotal);
+                            $progress->setFormat('verbose');
+                            $progress->start();
+                        }
+                        $progress->setProgress($dlnow);
+                        if ($dltotal == $dlnow) {
+                            $progress->finish();
+                        }
                     }
-                    $progress->setProgress($dlnow);
-                    if ($dltotal == $dlnow) {
-                        $progress->finish();
-                    }
-                }
-            ]
+                ]
             );
         } else {
+            $properties = implode(',', array_keys($changeRequest));
+            $etag = $this->getEtag($url, $useHost, $changeRequest);
+            //$payload = $this->generateChangeRequest($host . $url, $changeRequest);
+            $payload = json_encode($changeRequest);
             curl_setopt_array(
                 $curl, [
-                CURLOPT_URL              => $host . $url,
-                CURLOPT_COOKIEFILE       => storage_path('app/' . self::$cookie),
-                CURLOPT_COOKIEJAR        => storage_path('app/' . self::$cookie),
-                CURLOPT_SSL_VERIFYPEER   => false,
-                CURLOPT_RETURNTRANSFER   => true,
-                CURLOPT_NOPROGRESS       => true,
-                //CURLOPT_PUT             => 1,
-                //                CURLOPT_CUSTOMREQUEST    => "PUT",
-                CURLOPT_CUSTOMREQUEST    => "GET",
-                //                CURLOPT_POSTFIELDS       => ['file' => '@' . $changeRequest],
-                CURLOPT_HEADER           => [
-//                    'Content-Type:application/json',
-'Accept:application/x-oslc-cm-change-request+json',
-//                                   "If-Match: \"<etagvalue>\""
-                ],
-                CURLOPT_PROGRESSFUNCTION => function ($clientp, $dltotal, $dlnow, $ultotal, $ulnow) {
-                    if (!$this->created) {
-                        $progress = new ProgressBar(new ConsoleOutput(1, true), $dltotal);
-                        $progress->setFormat('verbose');
-                        $progress->start();
+                    CURLOPT_URL => $host . $url . '?oslc.properties=' . $properties,
+                    CURLOPT_COOKIEFILE => storage_path('app/' . self::$cookie),
+                    CURLOPT_COOKIEJAR => storage_path('app/' . self::$cookie),
+                    CURLOPT_SSL_VERIFYPEER => false,
+                    CURLOPT_RETURNTRANSFER => true,
+                    CURLOPT_VERBOSE => true,
+                    CURLOPT_HEADER => true,
+                    CURLINFO_HEADER_OUT => true,
+                    CURLOPT_POST => 1,
+                    CURLOPT_CUSTOMREQUEST => 'PUT',
+                    CURLOPT_POSTFIELDS => $payload,
+                    CURLOPT_HTTPHEADER => [
+                        'Content-Type: application/json',
+                        'Content-Length: ' . strlen($payload),
+                        'If-Match: ' . $etag,
+                        'Accept: application/json',
+                        'OSLC-Core-Version: 2.0'
+                    ],
+                    CURLOPT_PROGRESSFUNCTION => function ($clientp, $dltotal, $dlnow, $ultotal, $ulnow) {
+                        if (!$this->created) {
+                            $progress = new ProgressBar(new ConsoleOutput(1, true), $dltotal);
+                            $progress->setFormat('verbose');
+                            $progress->start();
+                        }
+                        $progress->setProgress($dlnow);
+                        if ($dltotal == $dlnow) {
+                            $progress->finish();
+                        }
                     }
-                    $progress->setProgress($dlnow);
-                    if ($dltotal == $dlnow) {
-                        $progress->finish();
-                    }
-                }
-            ]
+                ]
             );
         }
         $result = curl_exec($curl);
 
         $status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+        $requestHeaders = curl_getinfo($curl, CURLINFO_HEADER_OUT);
+
+
+        $info = curl_getinfo($curl);
+        curl_close($curl);
+
+        $header = substr($result, 0, $info['header_size']);
 
         if ($status != '200' AND $status != '302' AND $status != '403') {
             Log::critical(
                 "The cURL status request is " . $status . " for "
                 . $this->host . $url
             );
+            echo $requestHeaders;
+            echo $header;
+            echo $result;
+            exit("\nStatus \n" . $status);
+        } elseif ($status == '403') {
+            $this->authIdentity();
+            $this->auth();
+            Log::critical(
+                "The cURL status request is " . $status . " for "
+                . $this->host . $url
+            );
+            exit("\nStatus \n u: " . $this->user . "p: " . $this->pass . "\n\n" . $status);
+        }
+
+        if ($result == '') {
+            Log::critical(
+                "The cURL response is Empty for "
+                . $this->host . $url
+            );
+            exit("\nEmpty response on $host$url\n");
+        }
+
+        if (!\File::exists(storage_path('app/' . date('Y-m-d') . '.txt'))) {
+            File::put(storage_path('app/' . date('Y-m-d') . '.txt'), 0);
+        }
+
+        $counter = (int)File::get(storage_path('app/' . date('Y-m-d') . '.txt'));
+
+        $counter++;
+
+        File::put(storage_path('app/' . date('Y-m-d') . '.txt'), $counter);
+
+        return $result;
+    }
+
+
+    public function requestHeaders($url, $useHost = true, $changeRequest)
+    {
+
+        $host = '';
+        if ($useHost) {
+            $host = $this->host;
+        }
+
+        $curl = curl_init();
+        $properties = implode(',', array_keys($changeRequest));
+        curl_setopt_array(
+            $curl, [
+                CURLOPT_URL => $host . $url . '.json?oslc.properties=' . $properties . '&oslc.prefix=rtc_cm=%3Chttp://jazz.net/xmlns/prod/jazz/rtc/cm/1.0/%3E',
+                CURLOPT_COOKIEFILE => storage_path('app/' . self::$cookie),
+                CURLOPT_COOKIEJAR => storage_path('app/' . self::$cookie),
+                CURLOPT_SSL_VERIFYPEER => false,
+                CURLOPT_HEADER => true,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLINFO_HEADER_OUT => true,
+                CURLOPT_HTTPHEADER => [
+                    'Accept: application/json',
+                    'OSLC-Core-Version: 2.0',
+                ],
+            ]
+        );
+
+        $result = curl_exec($curl);
+
+        $status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+        $requestHeaders = curl_getinfo($curl, CURLINFO_HEADER_OUT);
+
+        $info = curl_getinfo($curl);
+
+        if ($status != '200' AND $status != '302' AND $status != '403') {
+            Log::critical(
+                "The cURL status request is " . $status . " for "
+                . $this->host . $url
+            );
+            echo $requestHeaders;
             exit("\nStatus \n" . $status);
         } elseif ($status == '403') {
             $this->authIdentity();
@@ -239,6 +328,8 @@ class Rtc
 
         curl_close($curl);
 
+        $header = substr($result, 0, $info['header_size']);
+
         if ($result == '') {
             Log::critical(
                 "The cURL response is Empty for "
@@ -247,18 +338,34 @@ class Rtc
             exit("\nEmpty response on $host$url\n");
         }
 
-        if(!\File::exists(storage_path('app/'.date('Y-m-d').'.txt'))){
-            File::put(storage_path('app/'.date('Y-m-d').'.txt'),0);
+        if (!\File::exists(storage_path('app/' . date('Y-m-d') . '.txt'))) {
+            File::put(storage_path('app/' . date('Y-m-d') . '.txt'), 0);
         }
 
-        $counter = (int) File::get(storage_path('app/'.date('Y-m-d').'.txt'));
+        $counter = (int)File::get(storage_path('app/' . date('Y-m-d') . '.txt'));
 
         $counter++;
 
-        File::put(storage_path('app/'.date('Y-m-d').'.txt'),$counter);
+        File::put(storage_path('app/' . date('Y-m-d') . '.txt'), $counter);
 
-        return $result;
+        return $header;
     }
+
+
+    public function getEtag($url, $useHost = true, $changeRequest)
+    {
+        $headers = $this->requestHeaders($url, $useHost, $changeRequest);
+        $matches = [];
+        preg_match('/(?:.*)ETag: "(.*)"/i',
+            $headers, $matches);
+        $etag = '';
+        if (isset($matches[1])) {
+            $etag = $matches[1];
+        }
+
+        return $etag;
+    }
+
 
     /**
      * @param $id
