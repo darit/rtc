@@ -29,6 +29,12 @@ class Workitem
     public $planned = null;
     public $progress;
     public $children;
+    public $incident_age;
+    public $incident_count;
+    public $incidence_new;
+    public $watch_count;
+    public $tolerance_cnt;
+    public $tolerance_age;
     private $rtc;
     private $data;
     private $workitem;
@@ -92,6 +98,25 @@ class Workitem
         if (isset($workitem->{"oslc_cm:resolved"})) {
             $this->resolved = $this->formatTime($workitem->{"oslc_cm:resolved"});
         }
+        if (isset($workitem->{"rtc_cm:incident_age"})) {
+            $this->incident_age = $workitem->{"rtc_cm:incident_age"};
+        }
+        if (isset($workitem->{"rtc_cm:incident_count"})) {
+            $this->incident_count = $workitem->{"rtc_cm:incident_count"};
+        }
+        if (isset($workitem->{"rtc_cm:incidence_new"})) {
+            $this->incidence_new = $workitem->{"rtc_cm:incidence_new"};
+        }
+        if (isset($workitem->{"rtc_cm:watch_count"})) {
+            $this->watch_count = $workitem->{"rtc_cm:watch_count"};
+        }
+        if (isset($workitem->{"rtc_cm:tolerance_cnt"})) {
+            $this->tolerance_cnt = $workitem->{"rtc_cm:tolerance_cnt"};
+        }
+        if (isset($workitem->{"rtc_cm:tolerance_age"})) {
+            $this->tolerance_age = $workitem->{"rtc_cm:tolerance_age"};
+        }
+        
 
         $this->children = $this->loadChildren();
 
