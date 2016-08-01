@@ -37,7 +37,7 @@ class Rtc
         $this->host = $config['host'];
         $this->user = $config['user'];
         $this->pass = $config['pass'];
-        $this->count = $config['count'];
+        $this->count = env('RTC_COUNT', false);
         if (!Storage::exists(self::$cookie)
             OR Storage::lastModified(self::$cookie) < strtotime('-1 hours')
         ) {
