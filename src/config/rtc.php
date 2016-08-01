@@ -10,4 +10,5 @@ return [
     'namespace' => '', //https://domain.tld:port/jts/users/
     'user' => env('RTC_USERNAME', ''),
     'pass' => env('RTC_PASSWORD', ''),
+    'count' => env('RTC_COUNT', false),
 ];

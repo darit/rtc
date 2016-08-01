@@ -37,6 +37,7 @@ class Rtc
         $this->host = $config['host'];
         $this->user = $config['user'];
         $this->pass = $config['pass'];
+        $this->count = $config['count'];
         if (!Storage::exists(self::$cookie)
             OR Storage::lastModified(self::$cookie) < strtotime('-1 hours')
         ) {
@@ -267,15 +268,17 @@ class Rtc
             exit("\nEmpty response on $host$url\n");
         }
 
-        if (!\File::exists(storage_path('app/' . date('Y-m-d') . '.txt'))) {
-            File::put(storage_path('app/' . date('Y-m-d') . '.txt'), 0);
+        if($this->count) {
+            if (!\File::exists(storage_path('app/' . date('Y-m-d') . '.txt'))) {
+                File::put(storage_path('app/' . date('Y-m-d') . '.txt'), 0);
+            }
+
+            $counter = (int)File::get(storage_path('app/' . date('Y-m-d') . '.txt'));
+
+            $counter++;
+
+            File::put(storage_path('app/' . date('Y-m-d') . '.txt'), $counter);
         }
-
-        $counter = (int)File::get(storage_path('app/' . date('Y-m-d') . '.txt'));
-
-        $counter++;
-
-        File::put(storage_path('app/' . date('Y-m-d') . '.txt'), $counter);
 
         return $result;
     }
@@ -343,15 +346,18 @@ class Rtc
             exit("\nEmpty response on $host$url\n");
         }
 
-        if (!\File::exists(storage_path('app/' . date('Y-m-d') . '.txt'))) {
-            File::put(storage_path('app/' . date('Y-m-d') . '.txt'), 0);
+        if($this->count) {
+
+            if (!\File::exists(storage_path('app/' . date('Y-m-d') . '.txt'))) {
+                File::put(storage_path('app/' . date('Y-m-d') . '.txt'), 0);
+            }
+
+            $counter = (int)File::get(storage_path('app/' . date('Y-m-d') . '.txt'));
+
+            $counter++;
+
+            File::put(storage_path('app/' . date('Y-m-d') . '.txt'), $counter);
         }
-
-        $counter = (int)File::get(storage_path('app/' . date('Y-m-d') . '.txt'));
-
-        $counter++;
-
-        File::put(storage_path('app/' . date('Y-m-d') . '.txt'), $counter);
 
         return $header;
     }
