@@ -294,42 +294,48 @@ class Workitem
             'stories' => [],
             'tasks'   => [],
         ];
-        foreach ($this->workitem->{"rtc_cm:com.ibm.team.workitem.linktype.parentworkitem.children"} as $child) {
-            $idParts = explode('/', $child->{"rdf:resource"});
-            $id = end($idParts);
-            $result = $this->rtc->executeCurl('/oslc/workitems/' . $id . '.json');
-            $json = json_decode($result);
-            $rtc = $this->rtc;
-            $item = Cache::rememberForever(
-                'workitem-' . $json->{"dc:identifier"}, function () use ($rtc, $json) {
-                return new self($json, $rtc, true);
-            }
-            );
-            if (isset($json->{"rtc_cm:storypts"})) {
-                $children['stories'][] = $item;
-            } elseif (isset($json->{"rtc_cm:defectcategory"})) {
-                $children['defects'][] = $item;
-            } else {
-                $children['tasks'][] = $item;
+        if(isset($this->workitem->{"rtc_cm:com.ibm.team.workitem.linktype.parentworkitem.children"})){
+            foreach ($this->workitem->{"rtc_cm:com.ibm.team.workitem.linktype.parentworkitem.children"} as $child) {
+                $idParts = explode('/', $child->{"rdf:resource"});
+                $id = end($idParts);
+                $id = trim($id);
+                $result = $this->rtc->executeCurl('/oslc/workitems/' . $id . '.json');
+                $json = json_decode($result);
+                $rtc = $this->rtc;
+                $item = Cache::rememberForever(
+                    'workitem-' . $json->{"dc:identifier"}, function () use ($rtc, $json) {
+                    return new self($json, $rtc, true);
+                }
+                );
+                if (isset($json->{"rtc_cm:storypts"})) {
+                    $children['stories'][] = $item;
+                } elseif (isset($json->{"rtc_cm:defectcategory"})) {
+                    $children['defects'][] = $item;
+                } else {
+                    $children['tasks'][] = $item;
+                }
             }
         }
-        foreach ($this->workitem->{"rtc_cm:com.ibm.team.workitem.linktype.parentworkitem.related"} as $child) {
-            $idParts = explode('/', $child->{"rdf:resource"});
-            $id = end($idParts);
-            $result = $this->rtc->executeCurl('/oslc/workitems/' . $id . '.json');
-            $json = json_decode($result);
-            $rtc = $this->rtc;
-            $item = Cache::rememberForever(
-                'workitem-' . $json->{"dc:identifier"}, function () use ($rtc, $json) {
-                return new self($json, $rtc, true);
-            }
-            );
-            if (isset($json->{"rtc_cm:storypts"})) {
-                $children['stories'][] = $item;
-            } elseif (isset($json->{"rtc_cm:defectcategory"})) {
-                $children['defects'][] = $item;
-            } else {
-                $children['tasks'][] = $item;
+        if(isset($this->workitem->{"rtc_cm:com.ibm.team.workitem.linktype.parentworkitem.related"})){
+            foreach ($this->workitem->{"rtc_cm:com.ibm.team.workitem.linktype.parentworkitem.related"} as $child) {
+                $idParts = explode('/', $child->{"rdf:resource"});
+                $id = end($idParts);
+                $id = trim($id);
+                $result = $this->rtc->executeCurl('/oslc/workitems/' . $id . '.json');
+                $json = json_decode($result);
+                $rtc = $this->rtc;
+                $item = Cache::rememberForever(
+                    'workitem-' . $json->{"dc:identifier"}, function () use ($rtc, $json) {
+                    return new self($json, $rtc, true);
+                }
+                );
+                if (isset($json->{"rtc_cm:storypts"})) {
+                    $children['stories'][] = $item;
+                } elseif (isset($json->{"rtc_cm:defectcategory"})) {
+                    $children['defects'][] = $item;
+                } else {
+                    $children['tasks'][] = $item;
+                }
             }
         }
 
